@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book Ride</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Book Ride</h1>
+    <form method="post" id="ride-form">
+        <label for="vehicle">Vehicle Type:</label>
+        <select id="vehicle" name="vehicle" required>
+            <option value="car">Car</option>
+            <option value="bike">Bike</option>
+        </select><br><br>
+        <label for="pickup">Pickup Location:</label>
+        <input type="text" id="pickup" name="pickup" required readonly><br><br>
+        <label for="destination">Destination:</label>
+        <input type="text" id="destination" name="destination" required readonly><br><br>
+        <button type="submit">Book Ride</button>
+    </form>
+    <div id="map"></div>
+
+    <script>
+        var map = L.map('map').setView([12.8797, 121.7740], 6);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+
+        var bounds = L.latLngBounds(
+            L.latLng(4.2158, 116.6321),
+            L.latLng(21.3216, 126.5869)
+        );
+        map.setMaxBounds(bounds);
+        map.on('drag', function() {
+            map.panInsideBounds(bounds, { animate: false });
+        });
+
+        var pickupMarker, destinationMarker;
+
+        map.on('click', function(e) {
+            if (!pickupMarker) {
+                pickupMarker = L.marker(e.latlng).addTo(map);
+                document.getElementById('pickup').value = `${e.latlng.lat},${e.latlng.lng}`;
+            } else if (!destinationMarker) {
+                destinationMarker = L.marker(e.latlng).addTo(map);
+                document.getElementById('destination').value = `${e.latlng.lat},${e.latlng.lng}`;
+            } else {
+                alert('Both pickup and destination points are already selected.');
+            }
+        });
+
+        document.getElementById('ride-form').addEventListener('reset', function() {
+            if (pickupMarker) {
+                map.removeLayer(pickupMarker);
+                pickupMarker = null;
+            }
+            if (destinationMarker) {
+                map.removeLayer(destinationMarker);
+                destinationMarker = null;
+            }
+        });
+    </script>
+</body>
+</html>

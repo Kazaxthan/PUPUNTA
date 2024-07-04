@@ -1,0 +1,52 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    text-align: center;
+}
+
+form {
+    display: inline-block;
+    margin-top: 20px;
+}
+
+label {
+    display: block;
+    margin: 10px 0 5px;
+}
+
+input {
+    margin-bottom: 10px;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#map {
+    margin-top: 20px;
+}
+
+.flash-messages {
+    margin: 20px 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: #f8f8f8;
+    border-radius: 5px;
+}
+
+.flash-message {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;
+    border-radius: 3px;
+    color: #333;
+}
