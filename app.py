@@ -13,7 +13,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), nullable=False, unique=True)
     password = db.Column(db.String(150), nullable=False)
-    student_id = db.Column(db.String(20), nullable=False, unique=True)
+    student_id = db.Column(db.String(20), nullable=True, unique=True)
     full_name = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), nullable=False, unique=True)
 
@@ -41,6 +41,12 @@ class MotorcycleFareCalculator:
         else:
             fare = 50 + 5 * 10 + (trip_distance - 7) * 15
         return fare
+
+motor_fare = {
+    'base_fare': 50,  # PHP
+    'fare_per_km': 10,  # PHP per km
+    'fare_per_minute': 2  # PHP per minute
+}
 
 four_seater_fare = {
     'base_fare': 50,  # PHP
