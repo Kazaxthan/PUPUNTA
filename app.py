@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from vehicle import Car_4_Seaters, Car_6_Seaters, Motorcycle
 import requests
 import json
 
@@ -16,53 +17,6 @@ class User(db.Model):
     student_id = db.Column(db.String(20), nullable=True, unique=True)
     full_name = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), nullable=False, unique=True)
-
-class CarFareCalculator:
-    def __init__(self, base_fare, fare_per_km, fare_per_minute):
-        self.base_fare = base_fare
-        self.fare_per_km = fare_per_km
-        self.fare_per_minute = fare_per_minute
-
-    def calculate_fare(self, trip_distance, trip_duration):
-        fare = self.base_fare + (trip_distance * self.fare_per_km) + (trip_duration * self.fare_per_minute)
-        return fare
-
-class MotorcycleFareCalculator:
-    def __init__(self):
-        pass
-
-    def calculate_fare(self, trip_distance, trip_duration):
-        if trip_distance <= 1:
-            fare = 50
-        elif 1 < trip_distance <= 2:
-            fare = 50
-        elif 2 < trip_distance <= 7:
-            fare = 50 + (trip_distance - 2) * 10
-        else:
-            fare = 50 + 5 * 10 + (trip_distance - 7) * 15
-        return fare
-
-motor_fare = {
-    'base_fare': 50,  # PHP
-    'fare_per_km': 10,  # PHP per km
-    'fare_per_minute': 2  # PHP per minute
-}
-
-four_seater_fare = {
-    'base_fare': 50,  # PHP
-    'fare_per_km': 10,  # PHP per km
-    'fare_per_minute': 2  # PHP per minute
-}
-
-six_seater_fare = {
-    'base_fare': 70,  # PHP
-    'fare_per_km': 15,  # PHP per km
-    'fare_per_minute': 3  # PHP per minute
-}
-
-four_seater_calculator = CarFareCalculator(**four_seater_fare)
-six_seater_calculator = CarFareCalculator(**six_seater_fare)
-motorcycle_calculator = MotorcycleFareCalculator()
 
 @app.route('/')
 def index():
@@ -107,6 +61,11 @@ def signup():
 
     return render_template('signup.html')
 
+
+four_seater = Car_4_Seaters()
+six_seater = Car_6_Seaters()
+motorcycle = Motorcycle()
+
 @app.route('/book_ride', methods=['GET', 'POST'])
 def book_ride():
     if 'user_id' in session:
@@ -122,7 +81,7 @@ def book_ride():
             pickup_coords = pickup_location.split(',')
             destination_coords = destination.split(',')
 
-            api_key = 'your_api_key'
+            api_key = '2db24b6d-1abc-47b2-bae1-29ade84697ba'
             url = f'https://graphhopper.com/api/1/route?point={pickup_coords[0]},{pickup_coords[1]}&point={destination_coords[0]},{destination_coords[1]}&vehicle=car&key={api_key}&points_encoded=false&type=json'
 
             try:
@@ -130,13 +89,14 @@ def book_ride():
                 route_data = response.json()
                 if 'paths' in route_data:
                     route_geometry = route_data['paths'][0]['points']['coordinates']
-                    trip_distance = route_data['paths'][0]['distance'] / 1000  # convert to km
-                    trip_duration = route_data['paths'][0]['time'] / 60000  # convert to minutes
+                    trip_distance = route_data['paths'][0]['distance']  # in meters
 
-                    if vehicle_type == 'car':
-                        fare = four_seater_calculator.calculate_fare(trip_distance, trip_duration)
-                    elif vehicle_type == 'bike':
-                        fare = motorcycle_calculator.calculate_fare(trip_distance, trip_duration)
+                    if vehicle_type == '4_seater':
+                        fare = four_seater.calculate_fare(trip_distance)
+                    elif vehicle_type == '6_seater':
+                        fare = six_seater.calculate_fare(trip_distance)
+                    elif vehicle_type == 'motor':
+                        fare = motorcycle.calculate_fare(trip_distance)
 
                     flash(f'Ride booked successfully! Estimated fare: {fare:.2f} PHP')
                     return render_template('book_ride.html', route=json.dumps(route_geometry))
